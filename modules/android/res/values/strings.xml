@@ -3,7 +3,7 @@
 
     <!--  BluetoothChat -->
     <string name="send">Send</string>
-    <string name="app_name">BlueCam</string>
+    <string name="app_name">Raupe</string>
     <string name="cancel">Cancel</string>
     <string name="qr_code">Scan</string>
     <string name="master_uri_hint">http://192.168.2.121:11311/</string>
