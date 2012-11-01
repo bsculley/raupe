@@ -64,6 +64,8 @@ public class TouchRaupeActivity extends Activity {
 	public static final int MESSAGE_DEVICE_NAME = 4;
 	public static final int MESSAGE_TOAST = 5;
 
+	public static final int FINGERTOLERANZ = 5;
+	
 	// Key names received from the BluetoothChatService Handler
 	public static final String DEVICE_NAME = "device_name";
 	public static final String TOAST = "toast";
@@ -202,12 +204,13 @@ public class TouchRaupeActivity extends Activity {
 		case MotionEvent.ACTION_UP:
 		case MotionEvent.ACTION_CANCEL:
 		case MotionEvent.ACTION_OUTSIDE:
+			speedMsg = new String("lr 0 0\n\r");
 			touched = false;
 			break;
 		default:
 		}
 
-		if (Math.abs(speedX - oldSpeedX)>5 || Math.abs(speedY - oldSpeedY)>5){
+		if (Math.abs(speedX - oldSpeedX) > FINGERTOLERANZ || Math.abs(speedY - oldSpeedY) > FINGERTOLERANZ || !touched){
 			sendMessage(speedMsg);
 			oldSpeedX = speedX;
 			oldSpeedY = speedY;
@@ -352,7 +355,6 @@ public class TouchRaupeActivity extends Activity {
 			case MESSAGE_READ:
 				byte[] readBuf = (byte[]) msg.obj;
 				// construct a string from the valid bytes in the buffer
-				String msgFull = new String(readBuf,0,1024);
 				String readMessage = new String(readBuf, 0, msg.arg1);
 				mConversationArrayAdapter.add(mConnectedDeviceName+": " + readMessage);
 				break;

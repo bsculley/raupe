@@ -21,8 +21,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.hardware.Camera;
-import android.hardware.Camera.CameraInfo;
-import android.hardware.Camera.Parameters;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -45,10 +43,6 @@ import org.ros.android.bluecam.MessageCallable;
 import org.ros.android.bluecam.R;
 import org.ros.android.bluecam.RosActivity;
 import org.ros.android.bluecam.Talker;
-import org.ros.android.bluecam.R.id;
-import org.ros.android.bluecam.R.layout;
-import org.ros.android.bluecam.R.menu;
-import org.ros.android.bluecam.R.string;
 import org.ros.android.view.RosTextView;
 import org.ros.android.view.camera.RosCameraPreviewView;
 import org.ros.node.NodeConfiguration;
@@ -65,7 +59,7 @@ import android.view.MenuItem;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class BlueCamActivity extends RosActivity {
+public class BlueCamActivity extends Activity {
 
   private int cameraId;
   private RosCameraPreviewView rosCameraPreviewView;
@@ -118,7 +112,7 @@ public class BlueCamActivity extends RosActivity {
   private static final boolean D = true;
 
   public BlueCamActivity() {
-    super("BlueCam", "BlueCam");
+//    super("BlueCam", "BlueCam");
   }
 
   @Override
@@ -226,14 +220,11 @@ public class BlueCamActivity extends RosActivity {
     }
     return true;
   }
-
+/*
   @Override
   protected void init(NodeMainExecutor nodeMainExecutor) {
     cameraId = 0;
     Camera camera = Camera.open(cameraId);
-    Parameters paras = camera.getParameters();
-    CameraInfo camInfo = new CameraInfo(); 
-    camera.getCameraInfo(cameraId, camInfo);
 //    int rotation = this.getWindowManager().getDefaultDisplay().getRotation();
 //    camera.setDisplayOrientation(rotation);
     camera.setDisplayOrientation(90);
@@ -252,7 +243,7 @@ public class BlueCamActivity extends RosActivity {
 
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
-    nodeConfiguration.setMasterUri(getMasterUri());
+//    nodeConfiguration.setMasterUri(getMasterUri());
 
     nodeMainExecutor.execute(rosCameraPreviewView, nodeConfiguration);
     nodeMainExecutor.execute(chatTalker, nodeConfiguration);
@@ -263,7 +254,7 @@ public class BlueCamActivity extends RosActivity {
     nodeMainExecutor.execute(chatTextView, nodeConfiguration);
     nodeMainExecutor.execute(raupeTextView, nodeConfiguration);
   }
-
+*/
   private void setupChat() {
       Log.d(TAG, "setupChat()");
 
@@ -443,7 +434,6 @@ public class BlueCamActivity extends RosActivity {
           case MESSAGE_READ:
               byte[] readBuf = (byte[]) msg.obj;
               // construct a string from the valid bytes in the buffer
-              String msgFull = new String(readBuf,0,1024);
               String readMessage = new String(readBuf, 0, msg.arg1);
               mConversationArrayAdapter.add(mConnectedDeviceName+": " + readMessage);
               break;
