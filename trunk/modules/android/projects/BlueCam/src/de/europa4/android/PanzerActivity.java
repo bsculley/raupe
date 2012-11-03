@@ -57,7 +57,7 @@ import android.view.MenuItem;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class TouchRaupeActivity extends Activity {
+public class PanzerActivity extends Activity {
 
 	private RosTextView<std_msgs.String> raupeTextView;
 	private Listener raupeListener;
@@ -111,15 +111,15 @@ public class TouchRaupeActivity extends Activity {
 	volatile boolean touched = false;
 	volatile float touched_x, touched_y;
 
-	public TouchRaupeActivity() {
-//		super("TouchRaupeActivity", "TouchRaupeActivity");
+	public PanzerActivity() {
+//		super("PanzerActivity", "PanzerActivity");
 	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-		setContentView(R.layout.touchraupe);
+		setContentView(R.layout.panzer);
 		//    getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
 
