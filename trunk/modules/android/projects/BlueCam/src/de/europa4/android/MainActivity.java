@@ -48,13 +48,18 @@ public class MainActivity extends RosActivity {
 	public static final int MESSAGE_TOAST = 5;
 
 	// IDs for Buttons
-	public static final int BUTTON_ID_BLUECAM = 1;
-	public static final int BUTTON_ID_TOUCHRAUPE = 2;
-	public static final int BUTTON_ID_EXIT = 3;
+	public static final int BUTTON_ID_CAMRX = 11;
+	public static final int BUTTON_ID_CAMTX = 12;
+	public static final int BUTTON_ID_BLUECAM = 21;
+	public static final int BUTTON_ID_TOUCHRAUPE = 31;
+	public static final int BUTTON_ID_EXIT = 41;
 	
 	// Key names received from the BluetoothChatService Handler
 	public static final String DEVICE_NAME = "device_name";
 	public static final String TOAST = "toast";
+	
+	private static NodeMainExecutor mainExecutor = null;
+	private static NodeConfiguration nodeConfig = null;
 
 	private static final int REQUEST_ENABLE_BT = 3;
 
@@ -78,6 +83,16 @@ public class MainActivity extends RosActivity {
 		//    getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
 		
+		Button camrxButton = (Button) findViewById(R.id.camrxButton);
+		camrxButton.setId(BUTTON_ID_CAMRX);
+    	// activating the button
+		camrxButton.setOnClickListener(new ButtonHandler());
+
+		Button camtxButton = (Button) findViewById(R.id.camtxButton);
+		camtxButton.setId(BUTTON_ID_CAMTX);
+    	// activating the button
+		camtxButton.setOnClickListener(new ButtonHandler());
+
 		Button bluecamButton = (Button) findViewById(R.id.bluecamButton);
 		bluecamButton.setId(BUTTON_ID_BLUECAM);
     	// activating the button
@@ -128,6 +143,9 @@ public class MainActivity extends RosActivity {
 		NodeConfiguration nodeConfiguration =
 				NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
 		nodeConfiguration.setMasterUri(getMasterUri());
+
+		setMainExecutor(nodeMainExecutor);
+		setNodeConfig(nodeConfiguration);
 	}
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -153,17 +171,45 @@ public class MainActivity extends RosActivity {
     }
 
 	private void handleButtonClick(View v) {
+		Intent intent = new Intent();
+		
 		switch (v.getId()) {
+		case BUTTON_ID_CAMRX:
+			intent.setClass(this, CamRxActivity.class);
+	    	startActivity(intent);
+			break;
+		case BUTTON_ID_CAMTX:
+			intent.setClass(this, CamTxActivity.class);
+	    	startActivity(intent);
+			break;
 		case BUTTON_ID_BLUECAM:
-	    	startActivity(new Intent(this, BlueCamActivity.class));
+			intent.setClass(this, BlueCamActivity.class);
+	    	startActivity(intent);
 			break;
 		case BUTTON_ID_TOUCHRAUPE:
-	    	startActivity(new Intent(this, TouchRaupeActivity.class));
+			intent.setClass(this, TouchRaupeActivity.class);
+	    	startActivity(intent);
 			break;
 		case BUTTON_ID_EXIT:
 			finish();
 			break;
 		}
     }
+
+	public static NodeMainExecutor getMainExecutor() {
+		return mainExecutor;
+	}
+
+	public void setMainExecutor(NodeMainExecutor mainExecutor) {
+		MainActivity.mainExecutor = mainExecutor;
+	}
+
+	public static NodeConfiguration getNodeConfig() {
+		return nodeConfig;
+	}
+
+	public void setNodeConfig(NodeConfiguration nodeConfig) {
+		MainActivity.nodeConfig = nodeConfig;
+	}
 
 }

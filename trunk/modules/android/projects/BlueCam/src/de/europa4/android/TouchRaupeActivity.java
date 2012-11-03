@@ -35,12 +35,17 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.ros.address.InetAddressFactory;
 import org.ros.android.bluecam.BluetoothChatService;
 import org.ros.android.bluecam.DeviceListActivity;
 import org.ros.android.bluecam.Listener;
 import org.ros.android.bluecam.MessageCallable;
 import org.ros.android.bluecam.R;
+import org.ros.android.bluecam.RosActivity;
 import org.ros.android.view.RosTextView;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMainExecutor;
+
 import android.os.Handler;
 import android.os.Message;
 import android.view.KeyEvent;
@@ -126,6 +131,8 @@ public class TouchRaupeActivity extends Activity {
 		raupeListener = new Listener();
 		raupeListener.setTopic("raupe");
 		raupeListener.setNodeName("raupe");
+		
+		MainActivity.getMainExecutor().execute(raupeListener, MainActivity.getNodeConfig());
 
 		raupeTextView = (RosTextView<std_msgs.String>) findViewById(R.id.raupetext);
 		raupeTextView.setTopicName("raupe/cmd");

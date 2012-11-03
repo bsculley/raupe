@@ -9,6 +9,8 @@
     <string name="master_uri_hint">http://192.168.2.121:11311/</string>
     <string name="new_master">New Master</string>
 
+    <string name="camrx">CamReceive</string>
+    <string name="camtx">CamTransmit</string>
     <string name="bluecam">BlueCam</string>
     <string name="touchraupe">TouchRaupe</string>
     <string name="exit">Exit</string>
