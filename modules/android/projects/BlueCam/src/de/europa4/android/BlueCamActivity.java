@@ -35,19 +35,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.ros.address.InetAddressFactory;
 import org.ros.android.bluecam.BluetoothChatService;
 import org.ros.android.bluecam.DeviceListActivity;
 import org.ros.android.bluecam.Listener;
 import org.ros.android.bluecam.MessageCallable;
 import org.ros.android.bluecam.R;
-import org.ros.android.bluecam.RosActivity;
 import org.ros.android.bluecam.Talker;
 import org.ros.android.view.RosTextView;
 import org.ros.android.view.camera.RosCameraPreviewView;
-import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeMainExecutor;
-
 import android.os.Handler;
 import android.os.Message;
 import android.view.KeyEvent;
@@ -129,6 +124,20 @@ public class BlueCamActivity extends Activity {
     mTitle = (TextView) findViewById(R.id.title_right_text);
     
     rosCameraPreviewView = (RosCameraPreviewView) findViewById(R.id.ros_camera_preview_view);
+    cameraId = 0;
+    Camera camera = Camera.open(cameraId);
+    camera.setDisplayOrientation(90);
+    rosCameraPreviewView.setCamera(camera);
+
+    chatTalker = new Talker();
+    
+    chatListener = new Listener();
+    chatListener.setTopic("chatter");
+    chatListener.setNodeName("chatter");
+    
+    raupeListener = new Listener();
+    raupeListener.setTopic("raupe");
+    raupeListener.setNodeName("raupe");
 
     chatTextView = (RosTextView<std_msgs.String>) findViewById(R.id.chattext);
     chatTextView.setTopicName("chatter");
@@ -151,6 +160,15 @@ public class BlueCamActivity extends Activity {
       }
     });
 
+	MainActivity.getMainExecutor().execute(rosCameraPreviewView, MainActivity.getNodeConfig());
+
+	MainActivity.getMainExecutor().execute(chatTalker, MainActivity.getNodeConfig());
+	MainActivity.getMainExecutor().execute(chatListener, MainActivity.getNodeConfig());
+	MainActivity.getMainExecutor().execute(chatTextView, MainActivity.getNodeConfig());
+
+	MainActivity.getMainExecutor().execute(raupeListener, MainActivity.getNodeConfig());
+	MainActivity.getMainExecutor().execute(raupeTextView, MainActivity.getNodeConfig());
+    
     // Get local Bluetooth adapter
     mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -220,41 +238,7 @@ public class BlueCamActivity extends Activity {
     }
     return true;
   }
-/*
-  @Override
-  protected void init(NodeMainExecutor nodeMainExecutor) {
-    cameraId = 0;
-    Camera camera = Camera.open(cameraId);
-//    int rotation = this.getWindowManager().getDefaultDisplay().getRotation();
-//    camera.setDisplayOrientation(rotation);
-    camera.setDisplayOrientation(90);
-    rosCameraPreviewView.setCamera(camera);
-//    rosCameraPreviewView.setCamera(Camera.open(cameraId));
 
-    chatTalker = new Talker();
-    
-    chatListener = new Listener();
-    chatListener.setTopic("chatter");
-    chatListener.setNodeName("chatter");
-    
-    raupeListener = new Listener();
-    raupeListener.setTopic("raupe");
-    raupeListener.setNodeName("raupe");
-
-    NodeConfiguration nodeConfiguration =
-        NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
-//    nodeConfiguration.setMasterUri(getMasterUri());
-
-    nodeMainExecutor.execute(rosCameraPreviewView, nodeConfiguration);
-    nodeMainExecutor.execute(chatTalker, nodeConfiguration);
-
-    nodeMainExecutor.execute(chatListener, nodeConfiguration);
-    nodeMainExecutor.execute(raupeListener, nodeConfiguration);
-
-    nodeMainExecutor.execute(chatTextView, nodeConfiguration);
-    nodeMainExecutor.execute(raupeTextView, nodeConfiguration);
-  }
-*/
   private void setupChat() {
       Log.d(TAG, "setupChat()");
 
