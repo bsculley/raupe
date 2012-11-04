@@ -6,66 +6,9 @@
     android:background="@color/translucent_red"
     android:orientation="vertical" >
 
-    <ListView
-        android:id="@+id/in"
-        android:layout_width="match_parent"
-        android:layout_height="75dp"
-        android:background="@color/background1"
-        android:stackFromBottom="true"
-        android:textSize="18dip"
-        android:transcriptMode="alwaysScroll" >
-    </ListView>
-
-    <org.ros.android.view.RosTextView
-        android:id="@+id/raupetext"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="3"
-        android:background="@color/background3"
-        android:textSize="20dip" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/fixedLeft"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/left" />
-
-        <Button
-            android:id="@+id/fixedStop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/stop" />
-
-        <Button
-            android:id="@+id/fixedRight"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/right" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:orientation="horizontal" >
-
-        <EditText
-            android:id="@+id/edit_text_out"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
-        <Button
-            android:id="@+id/button_send"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/send" />
-    </LinearLayout>
+    <org.ros.android.view.RosImageView
+        android:id="@+id/ros_image_view"
+        android:layout_width="300dp"
+        android:layout_height="300dp" />
 
 </LinearLayout>

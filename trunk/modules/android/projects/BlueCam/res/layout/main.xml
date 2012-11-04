@@ -12,11 +12,14 @@
 	<Button android:id="@+id/camtxButton" android:layout_width="match_parent"
 		android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/camtx" />
 	
-		<Button android:id="@+id/bluecamButton" android:layout_width="match_parent"
+	<Button android:id="@+id/bluecamButton" android:layout_width="match_parent"
 		android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/bluecam" />
 	
 	<Button android:id="@+id/touchButton" android:layout_width="match_parent"
 		android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/touchraupe" />
+
+	<Button android:id="@+id/panzerButton" android:layout_width="match_parent"
+		android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/panzer" />
 
 	<Button android:id="@+id/exitButton" android:layout_width="match_parent"
 		android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/exit" />

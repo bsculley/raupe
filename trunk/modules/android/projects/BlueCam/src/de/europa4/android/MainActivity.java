@@ -52,6 +52,7 @@ public class MainActivity extends RosActivity {
 	public static final int BUTTON_ID_CAMTX = 12;
 	public static final int BUTTON_ID_BLUECAM = 21;
 	public static final int BUTTON_ID_TOUCHRAUPE = 31;
+	public static final int BUTTON_ID_PANZER = 32;
 	public static final int BUTTON_ID_EXIT = 41;
 	
 	// Key names received from the BluetoothChatService Handler
@@ -102,6 +103,11 @@ public class MainActivity extends RosActivity {
 		touchButton.setId(BUTTON_ID_TOUCHRAUPE);
     	// activating the button
 		touchButton.setOnClickListener(new ButtonHandler());
+
+		Button panzerButton = (Button) findViewById(R.id.panzerButton);
+		panzerButton.setId(BUTTON_ID_PANZER);
+    	// activating the button
+		panzerButton.setOnClickListener(new ButtonHandler());
 
 		Button exitButton = (Button) findViewById(R.id.exitButton);
 		exitButton.setId(BUTTON_ID_EXIT);
@@ -188,6 +194,10 @@ public class MainActivity extends RosActivity {
 			break;
 		case BUTTON_ID_TOUCHRAUPE:
 			intent.setClass(this, TouchRaupeActivity.class);
+	    	startActivity(intent);
+			break;
+		case BUTTON_ID_PANZER:
+			intent.setClass(this, PanzerActivity.class);
 	    	startActivity(intent);
 			break;
 		case BUTTON_ID_EXIT:

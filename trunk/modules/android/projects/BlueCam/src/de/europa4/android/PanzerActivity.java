@@ -30,22 +30,15 @@ import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.ros.address.InetAddressFactory;
+import org.ros.android.bluecam.BitmapFromCompressedImage;
 import org.ros.android.bluecam.BluetoothChatService;
 import org.ros.android.bluecam.DeviceListActivity;
 import org.ros.android.bluecam.Listener;
-import org.ros.android.bluecam.MessageCallable;
 import org.ros.android.bluecam.R;
-import org.ros.android.bluecam.RosActivity;
-import org.ros.android.view.RosTextView;
-import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeMainExecutor;
-
+import org.ros.android.view.RosImageView;
 import android.os.Handler;
 import android.os.Message;
 import android.view.KeyEvent;
@@ -59,7 +52,8 @@ import android.view.MenuItem;
  */
 public class PanzerActivity extends Activity {
 
-	private RosTextView<std_msgs.String> raupeTextView;
+	private RosImageView<sensor_msgs.CompressedImage> image;
+
 	private Listener raupeListener;
 
 	// Message types sent from the BluetoothChatService Handler
@@ -69,7 +63,7 @@ public class PanzerActivity extends Activity {
 	public static final int MESSAGE_DEVICE_NAME = 4;
 	public static final int MESSAGE_TOAST = 5;
 
-	public static final int FINGERTOLERANZ = 5;
+	public static final int FINGERTOLERANZ = 1;
 	
 	// Key names received from the BluetoothChatService Handler
 	public static final String DEVICE_NAME = "device_name";
@@ -82,22 +76,15 @@ public class PanzerActivity extends Activity {
 
 	// Layout Views
 	private TextView mTitle;
-	private ListView mConversationView;
-	private EditText mOutEditText;
-	private Button mSendButton;
-	private Button mLeftButton;
 	private Button mStopButton;
-	private Button mRightButton;
 
 	private int dHeight;
 	private int dWidth;
-	private Integer oldSpeedX=0;
-	private Integer oldSpeedY=0;
 
 	// Name of the connected device
 	private String mConnectedDeviceName = null;
 	// Array adapter for the conversation thread
-	private ArrayAdapter<String> mConversationArrayAdapter;
+//	private ArrayAdapter<String> mConversationArrayAdapter;
 	// String buffer for outgoing messages
 	private StringBuffer mOutStringBuffer;
 	// Local Bluetooth adapter
@@ -105,11 +92,13 @@ public class PanzerActivity extends Activity {
 	// Member object for the chat services
 	private BluetoothChatService mChatService = null;
 
-	private static final String TAG = "TouchRaupeActivity";
+	private static final String TAG = "PanzerActivity";
 	private static final boolean D = true;
 
 	volatile boolean touched = false;
 	volatile float touched_x, touched_y;
+
+	private static final int ARDUINO_MAXSPEED = 40;
 
 	public PanzerActivity() {
 //		super("PanzerActivity", "PanzerActivity");
@@ -128,22 +117,27 @@ public class PanzerActivity extends Activity {
 		mTitle.setText(R.string.app_name);
 		mTitle = (TextView) findViewById(R.id.title_right_text);
 
+/*		
 		raupeListener = new Listener();
 		raupeListener.setTopic("raupe");
 		raupeListener.setNodeName("raupe");
 		
 		MainActivity.getMainExecutor().execute(raupeListener, MainActivity.getNodeConfig());
-
-		raupeTextView = (RosTextView<std_msgs.String>) findViewById(R.id.raupetext);
-		raupeTextView.setTopicName("raupe/cmd");
-		raupeTextView.setMessageType(std_msgs.String._TYPE);
-		raupeTextView.setMessageToStringCallable(new MessageCallable<String, std_msgs.String>() {
-			@Override
-			public String call(std_msgs.String message) {
-				sendMessage(message.getData() + "\n\r");
-				return message.getData();
+*/
+	    image = (RosImageView<sensor_msgs.CompressedImage>) findViewById(R.id.ros_image_view);
+	    image.setTopicName("/camera/image/compressed");
+	    image.setMessageType(sensor_msgs.CompressedImage._TYPE);
+	    image.setMessageToBitmapCallable(new BitmapFromCompressedImage());
+/*
+	    image.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				// Send a message using content of the edit text widget
+				String message = "key STOP\n\r";
+				sendMessage(message);
 			}
 		});
+*/
+	    MainActivity.getMainExecutor().execute(image, MainActivity.getNodeConfig());
 
 		DisplayMetrics displaymetrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
@@ -174,7 +168,7 @@ public class PanzerActivity extends Activity {
 			// Otherwise, setup the chat session
 		} else {
 			if (mChatService == null)
-				setupButtons();
+				setupBt();
 		}
 
 	}
@@ -210,32 +204,36 @@ public class PanzerActivity extends Activity {
 	
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		dumpEvent(event);
-		touched_x = event.getX();
-		touched_y = event.getY();
-		Integer speedX = 0;
-		Integer speedY = 0;
-		Integer velocity = 0;
-		Double direction = 0.0;
-		Double velDiff = 0.0;
-		Integer velLinks = 0;
-		Integer velRechts = 0;
-		
+		Double speedLinks = 0.0; 
+		Double speedRechts = 0.0; 
+		Double oldSpeedLinks = 0.0; 
+		Double oldSpeedRechts = 0.0; 
+
 		String speedMsg = new String("lr 0 0\n\r");
 		
 		int action = event.getAction();
+		
 		switch(action){
 		case MotionEvent.ACTION_DOWN:
 		case MotionEvent.ACTION_MOVE:
-			speedX = (int) (touched_x*100/dHeight - 28);
-			speedY = (int) (96 - touched_y*100/dWidth);
-			velocity = speedY;
-			direction = (double) (Math.atan2(speedX, speedY)) * (180.0 / Math.PI);
+
+			if (event.getPointerCount() == 2) {
+//				dumpEvent(event);
+
+				if (event.getX(0) < event.getX(1)) {
+					speedLinks = (double) (dHeight - event.getY(0));
+					speedRechts = (double) (dHeight - event.getY(1));
+				} else {
+					speedLinks = (double) (dHeight - event.getY(1));
+					speedRechts = (double) (dHeight - event.getY(0));
+				}
+				speedLinks *= ARDUINO_MAXSPEED * 2.0 / (double)dHeight;
+				speedLinks -= ARDUINO_MAXSPEED;
+				speedRechts *= ARDUINO_MAXSPEED * 2.0 / (double)dHeight;
+				speedRechts -= ARDUINO_MAXSPEED;
+				speedMsg = new String("lr " + speedLinks.intValue() + " " + speedRechts.intValue() + "\n\r");
+			}
 			
-			velDiff = velocity * Math.sin(direction*Math.PI/180.0);
-			velLinks = (int)(velocity + velDiff);
-			velRechts = (int)(velocity - velDiff);
-			speedMsg = new String("lr " + velLinks.toString() + " " + velRechts.toString() + "\n\r");
 			touched = true;
 			break;
 		case MotionEvent.ACTION_UP:
@@ -247,74 +245,18 @@ public class PanzerActivity extends Activity {
 		default:
 		}
 
-		if (Math.abs(speedX - oldSpeedX) > FINGERTOLERANZ || Math.abs(speedY - oldSpeedY) > FINGERTOLERANZ || !touched){
+		if (Math.abs(speedLinks - oldSpeedLinks) > FINGERTOLERANZ || Math.abs(speedRechts - oldSpeedRechts) > FINGERTOLERANZ || !touched){
 			sendMessage(speedMsg);
-			oldSpeedX = speedX;
-			oldSpeedY = speedY;
+			System.out.println(speedMsg);
+			oldSpeedLinks = speedLinks;
+			oldSpeedRechts = speedRechts;
 		}
 
-		StringBuffer sBuff = new StringBuffer();
-		sBuff.append(speedMsg);
-		raupeTextView.setText(sBuff.toString());
-		
-		System.out.println("action=" + event.toString());
-		System.out.println("velocity=" + velocity + "  direction=" + direction + "  velDiff=" + velDiff);
-		
 		return true; //processed
 	}
 
-	private void setupButtons() {
-		Log.d(TAG, "setupButtons()");
-
-		// Initialize the array adapter for the conversation thread
-		mConversationArrayAdapter = new ArrayAdapter<String>(this, R.layout.message);
-		mConversationView = (ListView) findViewById(R.id.in);
-		mConversationView.setAdapter(mConversationArrayAdapter);
-
-		// Initialize the compose field with a listener for the return key
-		mOutEditText = (EditText) findViewById(R.id.edit_text_out);
-		mOutEditText.setOnEditorActionListener(mWriteListener);
-
-		// Initialize the send button with a listener that for click events
-		mSendButton = (Button) findViewById(R.id.button_send);
-		mSendButton.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				// Send a message using content of the edit text widget
-				TextView view = (TextView) findViewById(R.id.edit_text_out);
-				String message = view.getText().toString();
-				sendMessage(message);
-			}
-		});
-
-		// Initialize the send button with a listener that for click events
-		mLeftButton = (Button) findViewById(R.id.fixedLeft);
-		mLeftButton.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				// Send a message using content of the edit text widget
-				String message = "key LEFT\n\r";
-				sendMessage(message);
-			}
-		});
-
-		// Initialize the send button with a listener that for click events
-		mStopButton = (Button) findViewById(R.id.fixedStop);
-		mStopButton.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				// Send a message using content of the edit text widget
-				String message = "key STOP\n\r";
-				sendMessage(message);
-			}
-		});
-
-		// Initialize the send button with a listener that for click events
-		mRightButton = (Button) findViewById(R.id.fixedRight);
-		mRightButton.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				// Send a message using content of the edit text widget
-				String message = "key RIGHT\n\r";
-				sendMessage(message);
-			}
-		});
+	private void setupBt() {
+		Log.d(TAG, "setupBt()");
 
 		// Initialize the BluetoothChatService to perform bluetooth connections
 		mChatService = new BluetoothChatService(this, mHandler);
@@ -343,7 +285,6 @@ public class PanzerActivity extends Activity {
 
 			// Reset out string buffer to zero and clear the edit text field
 			mOutStringBuffer.setLength(0);
-			mOutEditText.setText(mOutStringBuffer);
 		}
 	}
 
@@ -372,7 +313,7 @@ public class PanzerActivity extends Activity {
 				case BluetoothChatService.STATE_CONNECTED:
 					mTitle.setText(R.string.title_connected_to);
 					mTitle.append(mConnectedDeviceName);
-					mConversationArrayAdapter.clear();
+//					mConversationArrayAdapter.clear();
 					break;
 				case BluetoothChatService.STATE_CONNECTING:
 					mTitle.setText(R.string.title_connecting);
@@ -387,13 +328,13 @@ public class PanzerActivity extends Activity {
 				byte[] writeBuf = (byte[]) msg.obj;
 				// construct a string from the buffer
 				String writeMessage = new String(writeBuf);
-				mConversationArrayAdapter.add("Me: " + writeMessage);
+//				mConversationArrayAdapter.add("Me: " + writeMessage);
 				break;
 			case MESSAGE_READ:
 				byte[] readBuf = (byte[]) msg.obj;
 				// construct a string from the valid bytes in the buffer
 				String readMessage = new String(readBuf, 0, msg.arg1);
-				mConversationArrayAdapter.add(mConnectedDeviceName+": " + readMessage);
+//				mConversationArrayAdapter.add(mConnectedDeviceName+": " + readMessage);
 				break;
 			case MESSAGE_DEVICE_NAME:
 				// save the connected device's name
@@ -433,7 +374,7 @@ public class PanzerActivity extends Activity {
 			// When the request to enable Bluetooth returns
 			if (resultCode == Activity.RESULT_OK) {
 				// Bluetooth is now enabled, so set up a chat session
-				setupButtons();
+				setupBt();
 			} else {
 				// User did not enable Bluetooth or an error occured
 				Log.d(TAG, "BT not enabled");

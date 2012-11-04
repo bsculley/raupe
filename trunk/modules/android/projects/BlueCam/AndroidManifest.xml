@@ -37,6 +37,10 @@
                   android:windowSoftInputMode="stateHidden"
                   android:screenOrientation="landscape" />
         
+        <activity android:name="de.europa4.android.PanzerActivity"
+                  android:windowSoftInputMode="stateHidden"
+                  android:screenOrientation="landscape" />
+        
         <activity android:name="de.europa4.android.BlueCamActivity"
                   android:windowSoftInputMode="stateHidden" />
         
