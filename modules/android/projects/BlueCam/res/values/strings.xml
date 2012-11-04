@@ -13,6 +13,7 @@
     <string name="camtx">CamTransmit</string>
     <string name="bluecam">BlueCam</string>
     <string name="touchraupe">TouchRaupe</string>
+    <string name="panzer">PanzerSteuerung</string>
     <string name="exit">Exit</string>
     
     <string name="up">UP</string>
